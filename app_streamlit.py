@@ -91,7 +91,7 @@ def predict_disaster_type_internal(latitude, longitude, vung, month):
     try:
         input_df = pd.DataFrame({
             'Latitude': [latitude], 'Longitude': [longitude],
-            'Vung': [vung], 'month_year': [month]
+            'Vung': [vung], 'Month': [month]
         })
         processed_input = preprocessor_xgb.transform(input_df)
         prediction_encoded = xgb_model.predict(processed_input)
@@ -163,4 +163,5 @@ if st.button("Dự báo Phân loại", type="primary"):
     else:
 
         st.error("Mô hình XGBoost chưa được tải. Vui lòng kiểm tra lỗi.")
+
 
