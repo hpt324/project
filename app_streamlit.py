@@ -17,7 +17,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------------------------
-# TẢI CÁC MÔ HÌNH VÀ ĐỐI TƯỢNG (Giống hệt code Flask)
+# TẢI CÁC MÔ HÌNH VÀ ĐỐI TƯỢNG (ĐÃ SỬA LỖI)
 # ---------------------------------------------------------------------------
 # Dùng @st.cache_resource để tải mô hình 1 LẦN DUY NHẤT
 @st.cache_resource
@@ -26,39 +26,46 @@ def load_models():
     MODEL_DIR = "models"
     
     try:
-        # Tải mô hình LSTM
+        # 1. Tải mô hình LSTM
         lstm_model = tf.keras.models.load_model(os.path.join(MODEL_DIR, 'lstm_model.keras'))
         
-        # Tải mô hình XGBoost
+        # 2. Tải mô hình XGBoost
         xgb_model = xgb.XGBClassifier()
         xgb_model.load_model(os.path.join(MODEL_DIR, 'xgb_model.json'))
         
-        # Tải Scaler (LSTM)
+        # 3. Tải Scaler (LSTM)
         scaler_lstm = joblib.load(os.path.join(MODEL_DIR, 'scaler_lstm.joblib'))
         
-        # Tải Preprocessor (XGB)
+        # 4. Tải Preprocessor (XGB)
         preprocessor_xgb = joblib.load(os.path.join(MODEL_DIR, 'preprocessor_xgb.joblib'))
         
-        # Tải Label Encoder (XGB)
+        # 5. Tải Label Encoder (XGB)
         encoder_xgb_label = joblib.load(os.path.join(MODEL_DIR, 'encoder_xgb_label.joblib'))
         
-        # Tải dữ liệu lịch sử (LSTM)
+        # 6. Tải dữ liệu lịch sử (LSTM)
         ts_data_history_df = joblib.load(os.path.join(MODEL_DIR, 'ts_data_history.joblib'))
         ts_history_values = ts_data_history_df['event_count'].values
         
-        # Lấy danh sách các Vùng từ preprocessor để làm dropdown
-        VUNG_CATEGORIES = list(preprocessor_xgb.categories_[0])
+        # === SỬA LỖI Ở ĐÂY ===
+        # Lấy danh sách Vùng từ BÊN TRONG preprocessor đã fit
+        # Chúng ta truy cập vào transformer tên 'cat' (là OneHotEncoder)
+        # và lấy thuộc tính 'categories_' của NÓ.
+        ohe_transformer = preprocessor_xgb.named_transformers_['cat']
+        VUNG_CATEGORIES = list(ohe_transformer.categories_[0])
+        # =====================
         
         TIME_STEP = 12 # Phải giống với lúc huấn luyện
 
         print("--- Tải mô hình thành công ---")
         
+        # Trả về các đối tượng đã tải
         return (lstm_model, xgb_model, scaler_lstm, preprocessor_xgb, 
                 encoder_xgb_label, ts_history_values, VUNG_CATEGORIES, TIME_STEP)
 
     except Exception as e:
         print(f"LỖI NGHIÊM TRỌNG: Không thể tải mô hình. Lỗi: {e}")
         st.error(f"Lỗi khi tải mô hình: {e}")
+        # Trả về None để báo hiệu lỗi
         return (None,) * 8
 
 # Tải tất cả các mô hình
@@ -153,4 +160,5 @@ if st.button("Dự báo Phân loại", type="primary"):
             st.success(f"Dự báo: **{label}**")
             st.info(f"Độ tin cậy: **{proba:.2f}%**")
     else:
+
         st.error("Mô hình XGBoost chưa được tải. Vui lòng kiểm tra lỗi.")
