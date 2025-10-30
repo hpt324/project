@@ -91,7 +91,7 @@ def predict_disaster_type_internal(latitude, longitude, vung, month):
     try:
         input_df = pd.DataFrame({
             'Latitude': [latitude], 'Longitude': [longitude],
-            'Vùng': [vung], 'Month': [month]
+            'Vung': [vung], 'month_year': [month]
         })
         processed_input = preprocessor_xgb.transform(input_df)
         prediction_encoded = xgb_model.predict(processed_input)
@@ -137,9 +137,10 @@ with col1:
                          help="Ví dụ: 17.48 cho Bắc Trung Bộ")
     
     # Dùng st.selectbox cho Vùng
+    default_index = 0 
     vung = st.selectbox("Chọn Vùng", 
-                        options=VUNG_CATEGORIES, 
-                        index=VUNG_CATEGORIES.index("Bắc Trung Bộ")) # Đặt giá trị mặc định
+                    options=VUNG_CATEGORIES, 
+                    index=default_index) # Đặt giá trị mặc định
 
 with col2:
     lon = st.number_input("Kinh độ (Longitude)", 
@@ -162,3 +163,4 @@ if st.button("Dự báo Phân loại", type="primary"):
     else:
 
         st.error("Mô hình XGBoost chưa được tải. Vui lòng kiểm tra lỗi.")
+
