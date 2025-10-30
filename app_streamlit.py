@@ -17,7 +17,7 @@ st.set_page_config(
 )
 
 # ---------------------------------------------------------------------------
-# TẢI CÁC MÔ HÌNH VÀ ĐỐI TƯỢNG (ĐÃ SỬA LỖI)
+# TẢI CÁC MÔ HÌNH VÀ ĐỐI TƯỢNG (Phiên bản đầy đủ, đã sửa lỗi)
 # ---------------------------------------------------------------------------
 # Dùng @st.cache_resource để tải mô hình 1 LẦN DUY NHẤT
 @st.cache_resource
@@ -46,13 +46,9 @@ def load_models():
         ts_data_history_df = joblib.load(os.path.join(MODEL_DIR, 'ts_data_history.joblib'))
         ts_history_values = ts_data_history_df['event_count'].values
         
-        # === SỬA LỖI Ở ĐÂY ===
-        # Lấy danh sách Vùng từ BÊN TRONG preprocessor đã fit
-        # Chúng ta truy cập vào transformer tên 'cat' (là OneHotEncoder)
-        # và lấy thuộc tính 'categories_' của NÓ.
+        # 7. Lấy VUNG_CATEGORIES (Sửa lỗi 'categories_')
         ohe_transformer = preprocessor_xgb.named_transformers_['cat']
         VUNG_CATEGORIES = list(ohe_transformer.categories_[0])
-        # =====================
         
         TIME_STEP = 12 # Phải giống với lúc huấn luyện
 
@@ -163,5 +159,6 @@ if st.button("Dự báo Phân loại", type="primary"):
     else:
 
         st.error("Mô hình XGBoost chưa được tải. Vui lòng kiểm tra lỗi.")
+
 
 
